@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import config from "../../config";
 import { UserStatus } from "../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 
 
 const registerUserIntoDB = async (payload: any) => {
@@ -79,8 +79,44 @@ const loginUser = async (payload: any) => {
     return { accessToken, refreshToken };
 };
 
+const refreshToken = async (token: string) => {
+    if (!token) {
+        throw new Error("Refresh token is required!");
+    };
+
+    const verifiedRefreshToken = jwtUtils.verifyToken(token, config.jwt_refresh_secret as string);
+    if (!verifiedRefreshToken.success) {
+        throw new Error(verifiedRefreshToken.error);
+    };
+
+    const { id } = verifiedRefreshToken.data as JwtPayload;
+
+    const user = await prisma.user.findUniqueOrThrow({
+        where: { id }
+    });
+
+    if (user.status === UserStatus.SUSPENDED) {
+        throw new Error("User is suspended!");
+    };
+
+    const jwtPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    };
+
+    const accessToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        { expiresIn: config.jwt_access_expires_in } as SignOptions
+    );
+
+    return { accessToken };
+};
 
 export const authService = {
     registerUserIntoDB,
-    loginUser
+    loginUser,
+    refreshToken
 };
