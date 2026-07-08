@@ -5,6 +5,7 @@ import config from "./config";
 import { authRoutes } from "./modules/auth/auth.route";
 import { userRoutes } from "./modules/user/user.route";
 import { categoryRoutes } from "./modules/category/category.route";
+import { gearRoutes } from "./modules/gear/gear.route";
 
 
 const app: Application = express();
@@ -26,5 +27,6 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/gear-item", gearRoutes);
 
 export default app;
