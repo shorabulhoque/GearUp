@@ -8,3 +8,23 @@ enum UserStatus {
     ACTIVE
     SUSPENDED
 }
+
+enum OrderStatus {
+    PLACED
+    CONFIRMED
+    CANCELLED
+    PAID
+    PICKED_UP
+    RETURNED
+}
+
+enum PaymentGateway {
+    STRIPE
+    SSLCOMMERZ
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+}
