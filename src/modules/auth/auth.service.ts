@@ -2,6 +2,9 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import config from "../../config";
 import { UserStatus } from "../../../generated/prisma/enums";
+import { jwtUtils } from "../../utils/jwt";
+import { SignOptions } from "jsonwebtoken";
+
 
 const registerUserIntoDB = async (payload: any) => {
     const { name, email, password, role } = payload;
@@ -12,7 +15,7 @@ const registerUserIntoDB = async (payload: any) => {
 
     if (isUserExist) {
         throw new Error("User with this email already exists!");
-    }
+    };
 
     const hashedPassword = await bcrypt.hash(
         password,
@@ -47,20 +50,35 @@ const loginUser = async (payload: any) => {
 
     if (user.status === UserStatus.SUSPENDED) {
         throw new Error("Your account has been suspended. Please contact support.");
-    }
+    };
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
     if (!isPasswordMatched) {
         throw new Error("Password is incorrect");
-    }
+    };
 
-    const loggedInUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        omit: { password: true }
-    });
+    const jwtPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    };
 
-    return { user: loggedInUser };
+    const accessToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        { expiresIn: config.jwt_access_expires_in } as SignOptions
+    );
+
+    const refreshToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt_refresh_secret as string,
+        { expiresIn: config.jwt_refresh_expires_in } as SignOptions
+    );
+
+    return { accessToken, refreshToken };
 };
+
 
 export const authService = {
     registerUserIntoDB,
