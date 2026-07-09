@@ -13,7 +13,6 @@ const createGearItemIntoDB = async (
         throw new Error("Target category does not exist!");
     }
 
-    // নতুন গিয়ার আইটেম তৈরি
     const gearItem = await prisma.gearItem.create({
         data: {
             ...payload,

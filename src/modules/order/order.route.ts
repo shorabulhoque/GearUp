@@ -18,5 +18,17 @@ router.get(
     orderController.getMyRentals
 );
 
+router.get(
+    "/provider-orders",
+    auth(UserRole.PROVIDER),
+    orderController.getProviderOrders
+);
+
+router.patch(
+    "/:id/status",
+    auth(UserRole.PROVIDER),
+    orderController.updateOrderStatus
+);
+
 
 export const orderRoutes = router;

@@ -1,4 +1,3 @@
-import { connect } from "node:http2";
 import { prisma } from "../../lib/prisma";
 
 
@@ -102,8 +101,48 @@ const getMyRentalsFromDB = async (customerId: string) => {
     return result;
 };
 
+const getProviderOrdersFromDB = async (providerId: string) => {
+
+    const result = await prisma.rentalOrder.findMany({
+        where: {
+            items: {
+                some: {
+                    gearItem: {
+                        providerId: providerId
+                    }
+                }
+            }
+        },
+        include: {
+            customer: {
+                select: { name: true, email: true }
+            },
+            items: {
+                include: {
+                    gearItem: true
+                }
+            }
+        },
+        orderBy: { createdAt: "desc" }
+    });
+
+    return result;
+};
+
+const updateOrderStatusInDB = async (orderId: string, status: any) => {
+    const result = await prisma.rentalOrder.update({
+        where: { id: orderId },
+        data: { status },
+        include: { items: true }
+    });
+
+    return result;
+};
+
 
 export const orderService = {
     createRentalOrderIntoDB,
-    getMyRentalsFromDB
+    getMyRentalsFromDB,
+    getProviderOrdersFromDB,
+    updateOrderStatusInDB
 };
