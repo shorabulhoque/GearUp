@@ -9,6 +9,7 @@ import { gearRoutes } from "./modules/gear/gear.route";
 import { orderRoutes } from "./modules/order/order.route";
 import { reviewRoutes } from "./modules/review/review.route";
 import { paymentRoutes } from "./modules/payment/payment.route";
+import { adminRoutes } from "./modules/admin/admin.route";
 
 
 const app: Application = express();
@@ -39,6 +40,6 @@ app.use("/api/gear-item", gearRoutes);
 app.use("/api/rental-order", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payments", paymentRoutes);
-
+app.use("/api/admin", adminRoutes);
 
 export default app;

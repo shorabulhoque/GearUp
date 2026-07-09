@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { orderService } from "./order.service";
-
+import { OrderStatus } from "../../../generated/prisma/enums";
 
 const createRentalOrder = catchAsync(async (req: Request, res: Response) => {
     const customerId = req.user?.id as string;
@@ -46,12 +46,14 @@ const getProviderOrders = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { status } = req.body;
+    const id = req.params.id as string;
+    const status = req.body.status as OrderStatus;
 
-    if (!id || typeof id !== "string") {
-        throw new Error("Invalid or missing Rental Order ID");
+    const validStatuses = ["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELLED"];
+    if (!validStatuses.includes(status)) {
+        throw new Error(`Invalid status! Valid statuses are: ${validStatuses.join(", ")}`);
     }
+
     const result = await orderService.updateOrderStatusInDB(id, status);
 
     sendResponse(res, {
