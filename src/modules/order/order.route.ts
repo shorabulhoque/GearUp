@@ -12,5 +12,11 @@ router.post(
     orderController.createRentalOrder
 );
 
+router.get(
+    "/my-rentals",
+    auth(UserRole.CUSTOMER),
+    orderController.getMyRentals
+);
+
 
 export const orderRoutes = router;
