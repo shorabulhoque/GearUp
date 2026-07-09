@@ -4,6 +4,8 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { orderService } from "./order.service";
 import { OrderStatus } from "../../../generated/prisma/enums";
+import AppError from "../../errors/AppError";
+
 
 const createRentalOrder = catchAsync(async (req: Request, res: Response) => {
     const customerId = req.user?.id as string;
@@ -51,8 +53,8 @@ const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
 
     const validStatuses = ["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELLED"];
     if (!validStatuses.includes(status)) {
-        throw new Error(`Invalid status! Valid statuses are: ${validStatuses.join(", ")}`);
-    }
+        throw new AppError(httpStatus.BAD_REQUEST, `Invalid status! Valid statuses are: ${validStatuses.join(", ")}`);
+    };
 
     const result = await orderService.updateOrderStatusInDB(id, status);
 

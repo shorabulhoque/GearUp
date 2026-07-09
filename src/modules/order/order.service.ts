@@ -1,4 +1,6 @@
+import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
 
 
 const createRentalOrderIntoDB = async (
@@ -16,8 +18,8 @@ const createRentalOrderIntoDB = async (
     const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 
     if (totalDays <= 0) {
-        throw new Error("End date must be after the start date!");
-    }
+        throw new AppError(httpStatus.BAD_REQUEST, "End date must be after the start date!");
+    };
 
     return await prisma.$transaction(async (tx) => {
         let totalPrice = 0;
@@ -29,11 +31,11 @@ const createRentalOrderIntoDB = async (
             });
 
             if (!gearItem) {
-                throw new Error(`Gear item with ID ${item.gearItemId} not found!`);
+                throw new AppError(httpStatus.NOT_FOUND, `Gear item with ID ${item.gearItemId} not found!`);
             };
 
             if (gearItem.stock < item.quantity) {
-                throw new Error(`Inadequate stock for "${gearItem.title}". Available: ${gearItem.stock}`);
+                throw new AppError(httpStatus.BAD_REQUEST, `Inadequate stock for "${gearItem.title}". Available: ${gearItem.stock}`);
             };
 
             const itemPrice = gearItem.pricePerDay * totalDays * item.quantity;

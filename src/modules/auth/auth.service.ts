@@ -4,7 +4,8 @@ import config from "../../config";
 import { UserStatus } from "../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
-
+import AppError from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const registerUserIntoDB = async (payload: any) => {
     const { name, email, password, role } = payload;
@@ -14,7 +15,7 @@ const registerUserIntoDB = async (payload: any) => {
     });
 
     if (isUserExist) {
-        throw new Error("User with this email already exists!");
+        throw new AppError(httpStatus.CONFLICT, "User with this email already exists!");
     };
 
     const hashedPassword = await bcrypt.hash(
@@ -48,13 +49,13 @@ const loginUser = async (payload: any) => {
         where: { email }
     });
 
-    if (user.status === UserStatus.SUSPENDED) {
-        throw new Error("Your account has been suspended. Please contact support.");
+    if (user.status === "SUSPENDED") {
+        throw new AppError(httpStatus.FORBIDDEN, "Your account has been suspended. Please contact support.");
     };
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
     if (!isPasswordMatched) {
-        throw new Error("Password is incorrect");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Password is incorrect");
     };
 
     const jwtPayload = {
@@ -81,12 +82,12 @@ const loginUser = async (payload: any) => {
 
 const refreshToken = async (token: string) => {
     if (!token) {
-        throw new Error("Refresh token is required!");
+        throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token is required!");
     };
 
     const verifiedRefreshToken = jwtUtils.verifyToken(token, config.jwt_refresh_secret as string);
     if (!verifiedRefreshToken.success) {
-        throw new Error(verifiedRefreshToken.error);
+        throw new AppError(httpStatus.FORBIDDEN, verifiedRefreshToken.error);
     };
 
     const { id } = verifiedRefreshToken.data as JwtPayload;
@@ -96,7 +97,7 @@ const refreshToken = async (token: string) => {
     });
 
     if (user.status === UserStatus.SUSPENDED) {
-        throw new Error("User is suspended!");
+        throw new AppError(httpStatus.FORBIDDEN, "Your account has been suspended. Please contact support.");
     };
 
     const jwtPayload = {

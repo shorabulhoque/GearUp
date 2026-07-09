@@ -1,4 +1,6 @@
+import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
 
 
 const createGearItemIntoDB = async (
@@ -10,7 +12,7 @@ const createGearItemIntoDB = async (
     });
 
     if (!isCategoryExist) {
-        throw new Error("Target category does not exist!");
+        throw new AppError(httpStatus.CONFLICT, "Target category does not exist!");
     }
 
     const gearItem = await prisma.gearItem.create({

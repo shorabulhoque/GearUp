@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { adminService } from "./admin.service";
 import { UserStatus } from "../../../generated/prisma/enums";
+import AppError from "../../errors/AppError";
 
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
@@ -24,7 +25,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
     const status = req.body.status as UserStatus;
 
     if (status !== "ACTIVE" && status !== "SUSPENDED") {
-        throw new Error("Invalid status! Status must be either ACTIVE or SUSPENDED.");
+        throw new AppError(httpStatus.BAD_REQUEST, "Invalid status! Status must be either ACTIVE or SUSPENDED.");
     };
 
     const result = await adminService.updateUserStatusInDB(id, status);

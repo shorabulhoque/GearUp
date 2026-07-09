@@ -1,4 +1,6 @@
+import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
 
 const createCategoryIntoDB = async (payload: { name: string; description?: string }) => {
     const { name, description } = payload;
@@ -8,7 +10,7 @@ const createCategoryIntoDB = async (payload: { name: string; description?: strin
     });
 
     if (isCategoryExist) {
-        throw new Error("Category with this name already exists!");
+        throw new AppError(httpStatus.NOT_FOUND, "Category with this name already exists!");
     }
 
     const category = await prisma.category.create({

@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
+import AppError from "../../errors/AppError";
 
 
 const stripe = new Stripe(config.stripe_secret_key);
@@ -13,9 +15,9 @@ const createPaymentSessionInDB = async (rentalOrderId: string, customerId: strin
         }
     });
 
-    if (!order) throw new Error("Rental order not found!");
-    if (order.customerId !== customerId) throw new Error("Unauthorized to pay for this order!");
-    if (!order.customer?.email) throw new Error("Customer email not found!");
+    if (!order) throw new AppError(httpStatus.NOT_FOUND, "Rental order not found!");
+    if (order.customerId !== customerId) throw new AppError(httpStatus.FORBIDDEN, "Unauthorized to pay for this order!");
+    if (!order.customer?.email) throw new AppError(httpStatus.BAD_REQUEST, "Customer email not found!");
 
     const session = await stripe.checkout.sessions.create({
         customer_email: order.customer.email,
@@ -101,7 +103,7 @@ const handleStripeWebhookInDB = async (payload: Buffer, signature: string) => {
         );
     } catch (error: any) {
         console.error(`Webhook Signature Verification Failed:`, error.message);
-        throw new Error(`Webhook Error: ${error.message}`);
+        throw new AppError(httpStatus.BAD_REQUEST, `Webhook Error: ${error.message}`);
     };
 
     console.log(`Stripe Webhook Received Event Type: ${event.type}`);

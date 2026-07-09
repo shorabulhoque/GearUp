@@ -1,4 +1,7 @@
+import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
+
 
 const createReviewIntoDB = async (customerId: string, payload: { gearItemId: string; rating: number; comment: string }) => {
     const { gearItemId, rating, comment } = payload;
@@ -15,7 +18,7 @@ const createReviewIntoDB = async (customerId: string, payload: { gearItemId: str
     });
 
     if (!hasRented) {
-        throw new Error("You can only review gear items that you have actually rented!");
+        throw new AppError(httpStatus.FORBIDDEN, "You can only review gear items that you have actually rented!");
     }
 
     const result = await prisma.review.create({

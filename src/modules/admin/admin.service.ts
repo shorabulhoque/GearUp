@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { UserStatus } from "../../../generated/prisma/enums";
-
+import AppError from "../../errors/AppError";
+import httpStatus from "http-status";
 
 const getAllUsersFromDB = async () => {
 
@@ -20,7 +21,7 @@ const getAllUsersFromDB = async () => {
 const updateUserStatusInDB = async (userId: string, status: UserStatus) => {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("User not found!");
+    if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found!");
 
     return await prisma.user.update({
         where: { id: userId },
