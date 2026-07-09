@@ -7,6 +7,7 @@ import { userRoutes } from "./modules/user/user.route";
 import { categoryRoutes } from "./modules/category/category.route";
 import { gearRoutes } from "./modules/gear/gear.route";
 import { orderRoutes } from "./modules/order/order.route";
+import { reviewRoutes } from "./modules/review/review.route";
 
 
 const app: Application = express();
@@ -30,6 +31,6 @@ app.use("/api/user", userRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/gear-item", gearRoutes);
 app.use("/api/rental-order", orderRoutes);
-
+app.use("/api/reviews", reviewRoutes);
 
 export default app;
