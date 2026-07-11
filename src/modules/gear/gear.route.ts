@@ -12,7 +12,27 @@ router.post(
     gearController.createGearItem
 );
 
-router.get("/", gearController.getAllGearItems);
+router.get(
+    "/",
+    gearController.getAllGearItems
+);
+
+router.get(
+    "/:id",
+    gearController.getSingleGearItem
+);
+
+router.patch(
+    "/:id",
+    auth(UserRole.PROVIDER),
+    gearController.updateGearItem
+);
+
+router.delete(
+    "/:id",
+    auth(UserRole.PROVIDER),
+    gearController.deleteGearItem
+);
 
 
 export const gearRoutes = router;

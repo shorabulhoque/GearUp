@@ -80,7 +80,88 @@ const getAllGearItemsFromDB = async (query: Record<string, any>) => {
     };
 };
 
+const getSingleGearItemFromDB = async (id: string) => {
+    const gearItem = await prisma.gearItem.findUnique({
+        where: { id },
+        include: {
+            category: true
+        }
+    });
+
+    if (!gearItem) {
+        throw new AppError(httpStatus.NOT_FOUND, "Gear item not found!");
+    };
+
+    return gearItem;
+};
+
+const updateGearItemInDB = async (
+    id: string,
+    providerId: string,
+    payload: Partial<{ title: string; description: string; brand: string; pricePerDay: number; stock: number; categoryId: string }>
+) => {
+    const gearItem = await prisma.gearItem.findUnique({
+        where: { id }
+    });
+
+    if (!gearItem) {
+        throw new AppError(httpStatus.NOT_FOUND, "Gear item not found!");
+    };
+
+    if (gearItem.providerId !== providerId) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to update this gear item!");
+    };
+
+    if (payload.categoryId) {
+        const isCategoryExist = await prisma.category.findUnique({
+            where: { id: payload.categoryId }
+        });
+        if (!isCategoryExist) {
+            throw new AppError(httpStatus.CONFLICT, "Target category does not exist!");
+        };
+    };
+
+    const updateData = { ...payload } as any;
+    if (payload.stock !== undefined) {
+        updateData.isAvailable = payload.stock > 0;
+    };
+
+    const result = await prisma.gearItem.update({
+        where: { id },
+        data: updateData,
+        include: {
+            category: true
+        }
+    });
+
+    return result;
+};
+
+const deleteGearItemFromDB = async (id: string, providerId: string) => {
+    const gearItem = await prisma.gearItem.findUnique({
+        where: { id }
+    });
+
+    if (!gearItem) {
+        throw new AppError(httpStatus.NOT_FOUND, "Gear item not found!");
+    };
+
+    if (gearItem.providerId !== providerId) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to delete this gear item!");
+    };
+
+    const result = await prisma.gearItem.delete({
+        where: { id }
+    });
+
+    return result;
+};
+
+
 export const gearService = {
     createGearItemIntoDB,
-    getAllGearItemsFromDB
+    getAllGearItemsFromDB,
+    getSingleGearItemFromDB,
+    updateGearItemInDB,
+    deleteGearItemFromDB
 };

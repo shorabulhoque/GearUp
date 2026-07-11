@@ -23,6 +23,17 @@ const createCategoryIntoDB = async (payload: { name: string; description?: strin
     return category;
 };
 
+const getAllCategoriesFromDB = async () => {
+    const result = await prisma.category.findMany({
+        orderBy: {
+            name: "asc"
+        }
+    });
+    return result;
+};
+
+
 export const categoryService = {
-    createCategoryIntoDB
+    createCategoryIntoDB,
+    getAllCategoriesFromDB
 };

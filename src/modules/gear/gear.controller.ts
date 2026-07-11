@@ -33,8 +33,52 @@ const getAllGearItems = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getSingleGearItem = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const result = await gearService.getSingleGearItemFromDB(id);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Gear item details retrieved successfully",
+        data: result
+    });
+});
+
+const updateGearItem = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const providerId = req.user?.id as string;
+    const payload = req.body;
+
+    const result = await gearService.updateGearItemInDB(id, providerId, payload);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Gear item updated successfully",
+        data: result
+    });
+});
+
+const deleteGearItem = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const providerId = req.user?.id as string;
+
+    const result = await gearService.deleteGearItemFromDB(id, providerId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Gear item deleted successfully from your inventory",
+        data: result
+    });
+});
+
 
 export const gearController = {
     createGearItem,
-    getAllGearItems
+    getAllGearItems,
+    getSingleGearItem,
+    updateGearItem,
+    deleteGearItem
 };
