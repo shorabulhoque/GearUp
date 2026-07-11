@@ -141,10 +141,36 @@ const updateOrderStatusInDB = async (orderId: string, status: any) => {
     return result;
 };
 
+const getOrderDetailsFromDB = async (orderId: string, userId: string, userRole: string) => {
+    const order = await prisma.rentalOrder.findUnique({
+        where: { id: orderId },
+        include: {
+            customer: { select: { name: true, email: true } },
+            items: { include: { gearItem: true } }
+        }
+    });
+
+    if (!order) throw new AppError(httpStatus.NOT_FOUND, "Rental order not found!");
+
+    if (userRole === "CUSTOMER" && order.customerId !== userId) {
+        throw new AppError(httpStatus.FORBIDDEN, "Unauthorized to view this order!");
+    };
+
+    if (userRole === "PROVIDER") {
+        const hasProviderItem = order.items.some(item => item.gearItem.providerId === userId);
+        if (!hasProviderItem) {
+            throw new AppError(httpStatus.FORBIDDEN, "Unauthorized! This order does not contain your gear.");
+        };
+    };
+
+    return order;
+};
+
 
 export const orderService = {
     createRentalOrderIntoDB,
     getMyRentalsFromDB,
     getProviderOrdersFromDB,
-    updateOrderStatusInDB
+    updateOrderStatusInDB,
+    getOrderDetailsFromDB
 };

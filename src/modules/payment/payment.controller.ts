@@ -54,10 +54,26 @@ const handleStripeWebhook = catchAsync(async (req: Request, res: Response) => {
     res.status(httpStatus.OK).json({ received: true });
 });
 
+const getPaymentDetails = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const userId = req.user?.id as string;
+    const userRole = req.user?.role as string;
+
+    const result = await paymentService.getPaymentDetailsFromDB(id, userId, userRole);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Payment details retrieved successfully",
+        data: result
+    });
+});
+
 
 export const paymentController = {
     createPaymentSession,
     confirmPayment,
     getPaymentHistory,
-    handleStripeWebhook
+    handleStripeWebhook,
+    getPaymentDetails
 };

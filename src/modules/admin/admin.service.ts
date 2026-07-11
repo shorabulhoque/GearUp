@@ -41,9 +41,20 @@ const getAllRentalOrdersFromDB = async () => {
     });
 };
 
+const getAllGearFromDB = async () => {
+    return await prisma.gearItem.findMany({
+        include: {
+            category: true,
+            provider: { select: { name: true, email: true } }
+        },
+        orderBy: { createdAt: "desc" }
+    });
+};
+
 
 export const adminService = {
     getAllUsersFromDB,
     updateUserStatusInDB,
-    getAllRentalOrdersFromDB
+    getAllRentalOrdersFromDB,
+    getAllGearFromDB
 };

@@ -66,10 +66,27 @@ const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getOrderDetails = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const userId = req.user?.id as string;
+    const userRole = req.user?.role as string;
+
+    const result = await orderService.getOrderDetailsFromDB(id, userId, userRole);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Rental order details retrieved successfully",
+        data: result
+    });
+});
+
+
 
 export const orderController = {
     createRentalOrder,
     getMyRentals,
     getProviderOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    getOrderDetails
 };

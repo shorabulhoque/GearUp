@@ -30,5 +30,11 @@ router.patch(
     orderController.updateOrderStatus
 );
 
+router.get(
+    "/:id",
+    auth(UserRole.CUSTOMER, UserRole.PROVIDER, UserRole.ADMIN),
+    orderController.getOrderDetails
+);
+
 
 export const orderRoutes = router;

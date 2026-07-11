@@ -155,10 +155,26 @@ const handleStripeWebhookInDB = async (payload: Buffer, signature: string) => {
     }
 };
 
+const getPaymentDetailsFromDB = async (paymentId: string, userId: string, userRole: string) => {
+    const payment = await prisma.payment.findUnique({
+        where: { id: paymentId },
+        include: { rentalOrder: true }
+    });
+
+    if (!payment) throw new AppError(httpStatus.NOT_FOUND, "Payment record not found!");
+
+    if (userRole === "CUSTOMER" && payment.rentalOrder.customerId !== userId) {
+        throw new AppError(httpStatus.FORBIDDEN, "Unauthorized to view this payment details!");
+    };
+
+    return payment;
+};
+
 
 export const paymentService = {
     createPaymentSessionInDB,
     confirmPaymentInDB,
     getPaymentHistoryFromDB,
-    handleStripeWebhookInDB
+    handleStripeWebhookInDB,
+    getPaymentDetailsFromDB
 };

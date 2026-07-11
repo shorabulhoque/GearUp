@@ -14,5 +14,7 @@ router.get("/", auth(UserRole.CUSTOMER), paymentController.getPaymentHistory);
 
 router.post("/webhook", paymentController.handleStripeWebhook);
 
+router.get("/:id", auth(UserRole.CUSTOMER, UserRole.ADMIN), paymentController.getPaymentDetails);
+
 
 export const paymentRoutes = router;

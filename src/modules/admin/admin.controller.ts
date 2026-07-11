@@ -50,9 +50,21 @@ const getAllRentalOrders = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getAllGearForAdmin = catchAsync(async (req: Request, res: Response) => {
+    const result = await adminService.getAllGearFromDB();
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "All gear listings retrieved successfully for admin",
+        data: result
+    });
+});
+
 
 export const adminController = {
     getAllUsers,
     updateUserStatus,
-    getAllRentalOrders
+    getAllRentalOrders,
+    getAllGearForAdmin
 };
